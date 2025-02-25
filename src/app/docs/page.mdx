@@ -1,0 +1,151 @@
+---
+description:
+  Nextra is a framework built on top of Next.js that enables the creation of
+  content-focused websites. It combines the robust features of Next.js with
+  enhanced capabilities for crafting Markdown-based content.
+---
+
+import { Cards, Image } from "nextra/components";
+import { cloneElement } from "react";
+
+export default function MdxLayout(props) {
+  return cloneElement(props.children, {
+    components: {
+      img: Image,
+    },
+  });
+}
+
+# Introduction
+
+**V2Table** introduces seamless interaction with large datasets, advanced cellular customizations, and robust filtering capabilities, all within a streamlined and standardized implementation. While v1 had several features scattered in bits and pieces, v2 has consolidated and refined them, incorporating Excel-like abilities like freezing and resizing tables, and establishing strong standards for consistent interactions. Developed in close collaboration with our product stakeholders, this new approach simplifies setup and updates, delivering a more cohesive and powerful experience
+
+Every table is identified by individual "entity", Each have their own sets of properties and own sets of APIs.
+
+Naming Conventions & Consistency in v2Table
+
+## Motto
+
+our primary goal is to maintain consistency across our codebase rather than always striving for the theoretically best convention. While some naming choices might not align with standard best practices, we prioritize uniformity to establish a structured pattern in the codebase.
+
+### Consistency Over Perfection
+
+In certain cases, the most conventional naming approach may not have been followed. For example, we use filter_type instead of filterType. While filterType would align with typical camelCase conventions in JavaScript and TypeScript, we made a deliberate decision to use filter_type to ensure consistency across all related components.
+
+### Standardization in v2Table
+
+Moving forward, all instances in the v2Table component and related modules will adhere to the same naming conventions. This means that:
+
+- Existing patterns will be followed rather than revised retroactively.
+- New properties will align with established naming schemes.
+- Developers can expect uniformity across different versions and updates of the table component.
+
+By adhering to this approach, we ensure structured consistency, improve maintainability, and enable automated updates across different versions of the table component.
+
+### Bulk Edit Payload structure:
+
+```javascript
+{
+	...(patchKey && {
+		[patchKey]: selectedOption?.submenu?.[patchDataKey],
+	}),
+	selected_ids: Object.keys(selectedRows),
+	unselected_ids: Object.keys(unselectedRows),
+	select_all: isAllDataSelected,
+	filter_by: tableData.filter_by,
+	...(additionalProps ?? {}),
+}
+
+```
+
+_field_id in Filter_
+Why was field_id not used to identify the filter?
+https://zluri.slack.com/archives/C01N0BWLU2Z/p1709120113597949
+**enabled_filters** => This points to the field_name of the filter. This enables the column level filter for this particular column. field_name was used (even though its in human readable format), assuming the field_name will always be unique since its a customer facing label and its makes no sense at all to have two different filter with the same name.
+Problems with this:
+Upcoming design of grouping in filters UI, Multiple group of filters may have same label
+(?? ) under different group
+
+What if custom_fields name match with existing fields
+**export_key**: This is an entity which is used in export. This can be a string or an an array of field_ids to be displayed on the exported CSV. Currently the fallback for export is `sort_key`, and `sortKey` this was done to ensure backward compatibility. We need to start using `export_key` .
+Columns is the mother of everything. If there is a filter in the filter list, then there SHOULD be associated column as well. Every column will have a `primary_key` which indicates what its export or what its sort will be. If there is a column in exported file then there should be a corresponding column in the UI as well.
+No additional filters. No additional export columns.
+Composite columns will also have single filter but the filter can have a dropdown. for example Application column can have app logo , app name and app status data within it, but the there will be a single entry filter named Application which can further be expanded into app logo and app name and app status filter. That means one filter will always impact one column.
+Set some nomenclatures:
+
+- Module = Application
+- Entity Level= Application User
+
+Filters follow the similar data format as v1, the only difference you might feel is on how the filters work.
+
+Search and filters are treated independently in frontend state, regardless of whether they apply to same columns or not. If a change in one of the entity (filter or search) affects another, then this will be a bug.
+
+If both search and filters are applied, the results will be the AND of both, if they apply to the same column.
+
+- Reset Filter
+- Clear Filter
+
+Quick Filter is a frontend construct.
+
+How Views work
+
+- The difference
+
+Bulk Edit:
+
+- Standard Payload format
+
+How Caching work:
+
+- Redux
+
+How default States are applied:
+
+- From url
+
+"We will delve into key features of v2Table and explore how it works. I’ll cover some of the standout functionalities that set v2Table apart. Additionally, I'll discuss the standardizations we’ve put in place to ensure consistency and quality across the board.
+*The journey of v2Table begins with the property file. This file is crucial as it defines all the meta-information about the table. It includes essential details such as column names and their descriptions, customized cell components, and the filters associated with each column.
+*This foundational setup allows v2Table to be highly configurable and adaptable to different use cases. By specifying these properties, we lay the groundwork for a dynamic and flexible table component that can be tailored to meet various needs.
+Start with Property file:
+*Another significant change from v1 to v2 is how filters and search are handled. In v2, filters and search are treated as separate entities. Although technically search is a type of filter, the UI distinguishes between the two to ensure clarity and functionality.
+*In v2, filters and search do not affect each other directly. For instance, while search is applied to the primary column (e.g., `app_name` in the application table), filters and search are displayed and managed independently in the UI. This means that when both are applied, the results reflect an AND operation—both the search criteria and the filters must be satisfied.
+_This separation ensures that each function operates distinctly, providing a more precise and controlled user experience
+_"In v2Table, we offer several types of views to enhance user experience and flexibility. A Custom View allows users to tailor the table by selecting the columns they wish to display, applying filters, configuring sorting options, and setting the pagination layout. This view can be saved for future use, making it easier for users to access their preferred configurations quickly and efficiently."
+_"We also provide a Standard View, which comes with a predefined setup including a set of essential columns, quick filters, and default sorting options. This view serves as a consistent starting point, ensuring that users have immediate access to key data without needing to configure settings from scratch."
+_"Users can create and save their own configurations as Saved Views. These are personalized setups that include specific column choices, filter applications, sorting preferences, and pagination settings. Saved Views streamline workflows by allowing users to easily switch between their customized configurations."
+_"Quick Filters are another feature available in both Standard and Custom Views. These predefined filters enable users to rapidly apply common criteria to the table, simplifying data analysis and improving usability."
+_"Finally, Column Configuration allows users to adjust which columns are visible in the table, their order, and their visibility settings. This customization helps users tailor the table’s layout to fit their specific data needs and preferences\***\*\*\*\*\***
+
+## FAQ
+
+The Nextra FAQ is a collection of useful questions and answers about the
+project. If you have a question that isn't answered here, please
+[open a discussion](https://github.com/shuding/nextra/discussions).
+
+<details>
+  {/* prettier-ignore */}
+  <summary>Can I use Nextra with Next.js `pages` router?</summary>
+Nextra 4 only works with the `app` router. Only Nextra 1/2/3 supports the
+`pages` router.
+
+</details>
+
+<details>
+  <summary>Can I use X with Nextra?</summary>
+The answer is "yes" for most things. Since Nextra is just a Next.js plugin, almost all the things
+that can be done with React can be done with Nextra. Here are some examples and guides:
+
+- [Use Tailwind CSS](/docs/guide/tailwind-css)
+- [Use custom CSS and Sass](/docs/guide/custom-css)
+- [Use custom fonts](https://nextjs.org/docs/basic-features/font-optimization)
+
+</details>
+
+<details>
+  {/* prettier-ignore */}
+  <summary>How can I add a live coding component in Nextra?</summary>
+There are libraries like [Sandpack](https://sandpack.codesandbox.io) and
+[react-live](https://github.com/FormidableLabs/react-live) that can help you
+add live coding components to your MDX.
+
+</details>

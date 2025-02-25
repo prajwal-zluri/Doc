@@ -1,0 +1,444 @@
+---
+title: API
+description:
+  Nextra is a framework built on top of Next.js that enables the creation of
+  content-focused websites. It combines the robust features of Next.js with
+  enhanced capabilities for crafting Markdown-based content.
+---
+
+import { Cards, Image } from "nextra/components";
+import { cloneElement } from "react";
+
+export default function MdxLayout(props) {
+  return cloneElement(props.children, {
+    components: {
+      img: Image,
+    },
+  });
+}
+
+# API
+
+Implements IV2Table interface.
+
+```typescript
+{
+	apiProps?: any;
+
+	columnMinWidth?: number;
+	cellProps?: AnyObject;
+
+	dataFreshnessEntity?: DataFreshnessEntityType;
+	disableScheduledExport?: boolean;
+	disableSort?: boolean;
+	disableUrlSync?: boolean;
+
+	enableBulkEdit?: boolean;
+	// --> This is deprecated just to make sure that no one uses this prop without additional information
+	/**
+	 * Since Bulk Update curenlcy only works for Application main table only
+	 * and the component used is just dummy copy of v1.
+	 * If needed to be used whatever exists right now for users then go to context.tsx
+	 * and the update the `screen` value to use `User` for users table and `Application` for Application table
+	 * @deprecated Only use this in application main table for now
+	 * Remove this Deprecate sign once v2 bulk update is made correctly functional.
+	 */
+	enableBulkUpdate?: boolean;
+	enableCacheRestore?: boolean;
+	enableColumnLevelFilter?: boolean;
+	enablePlaybook?: boolean;
+	enableViews?: boolean;
+	entity: TableEntityType;
+	entityId?: string;
+	exportEntity?: ExportEntityType;
+
+	hideColumnModifier?: boolean;
+	hideCustomExport?: boolean;
+	hideExportAsCSV?: boolean;
+	hideExportCSVForExcel?: boolean;
+	hideFilters?: boolean;
+	hideOptionsMenu?: boolean;
+	hidePagination?: boolean;
+	hideSearch?: boolean;
+	hideQuickFilters?: boolean;
+
+	idProperty?: string; // => The key identifier of the data. eg. "_id" | "id"
+
+	/**
+	 * @deprecated Do not use this yet -> Requires some confidence to make this globally available
+	 */
+	onBulkEdit?: (props: { payload: IBulkEditPayload; menu: any }) => void;
+	onCellUpdate?: OnCellUpdateType;
+	onRowReorder?: TypeRowReorderFn;
+	onSelectionChange?: (d: any) => void; // TODO:
+
+	renderAddComponent?: () => React.ReactNode;
+	renderCustomBulkEditConfirmationPopup?: (d: any) => React.ReactNode; // TODO:
+	renderCustomCheckbox?: (arg: {
+		handleChange: (arg: any) => void;
+		checked: boolean;
+		disabled: boolean;
+		cellProps: any;
+	}) => React.ReactNode;
+	renderDynamicController?: () => React.ReactNode;
+	renderEmptyState?: (d: any) => React.ReactNode; // TODO:
+	renderInformationBanner?: () => React.ReactNode;
+
+	subEntityData?: ISubEntityData; // TODO:
+
+	textMap?: ITextMap;
+
+	virtualizeColumns?: boolean;
+
+	// --> all below props intended to be removed or checking and verifying
+	/**
+	 * @deprecated Do not use this
+	 */
+	disabledUnselectedItems?: string[];
+	/**
+	 * @deprecated Do not use this. Try using textMap prop instead
+	 */
+	emptyMessage?: string;
+	enableRowReOrdering?: boolean;
+	exportAllColumns?: boolean;
+	forceInfinite?: boolean;
+	headerContent?: React.JSX.Element;
+	/**
+	 * @deprecated Do not use this.
+	 */
+	hideActionFilters?: boolean;
+	/**
+	 * @deprecated Do not use this. Try using entityId instead
+	 */
+	intID?: any;
+	mandatoryExportFieldId?: string;
+	/**
+	 * @deprecated Do not use this. Try using textMap prop instead
+	 */
+	paginationEntity?: string;
+	renderRowReorderProxy?: any;
+	showCheckboxColumn?: boolean;
+	scheduleExportName?: string;
+	/**
+	 * @deprecated Do not use this. Try using textMap prop instead
+	 */
+	searchPlaceholderText?: string;
+	/**
+	 * @deprecated Do not use this. Try using textMap prop instead
+	 */
+	selectAllText?: string;
+	quickfiltersmockdata?: IV2QuickFilter[];
+}
+
+
+```
+
+### `apiProps`
+
+> type: <b>any</b> <br/>
+> default: <b>undefined</b>
+
+An optional object that allows passing additional parameters or configurations to the API request.
+
+### `columnMinWidth`
+
+> type: <b>number (in pixel)</b> <br/>
+> default: <b>150</b>
+
+Specifies the default minimum width of a column. If a component's minWidth property is set in the property file, it will override this value.
+
+### `cellProps`
+
+> type: <b>AnyObject</b> <br/>
+> default: <b>undefined</b>
+
+An optional object used to pass additional configurations or information to cell components. This property is available across all components from its prop in the component factory, allowing them to access and utilize the provided data as needed.
+
+### `dataFreshnessEntity` @TODO
+
+> type: <b>DataFreshnessEntityType</b> <br/>
+> default: <b>undefined</b>
+
+### `disableScheduledExport` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+
+### `disableSort` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+
+### `disableUrlSync` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+
+### `enableBulkEdit` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+
+### `enableBulkUpdate` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>false</b>
+
+This is deprecated just to make sure that no one uses this prop without additional information. Since Bulk Update currently only works for the Application main table, and the component used is just a dummy copy of v1. If needed to be used whatever exists right now for users then go to context.tsx and update the `screen` value to use `User` for users table and `Application` for the Application table. Only use this in the application main table for now. Remove this deprecate sign once v2 bulk update is made correctly functional.
+
+### `enableCacheRestore` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>false</b>
+
+### `enableColumnLevelFilter` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+
+### `enablePlaybook` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+
+### `enableViews` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+> Required:false
+
+### `entity` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Required
+
+### `entityId` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Required: true
+
+### `exportEntity` @TODO
+
+> type: <b>ExportEntityType</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `hideColumnModifier` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `hideCustomExport` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `hideExportAsCSV` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `hideExportCSVForExcel` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `hideFilters` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>false</b> <br/>
+
+### `hideOptionsMenu` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `hidePagination`
+
+> type: <b>boolean</b> <br/>
+> default: <b>false</b> <br/>
+
+Specifies whether to hide the pagination controller from the UI. When set to true, the pagination controls will not be displayed.
+
+### `hideSearch` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>false</b> <br/>
+
+Specifies whether to hide the search bar. When set to true, the search bar will be hidden from the UI.
+
+### `hideQuickFilters` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `idProperty` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>\_id</b> <br/>
+
+### `onBulkEdit` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `onCellUpdate` @TODO
+
+> type: <b>OnCellUpdateType</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `onRowReorder` @TODO
+
+> type: <b>TypeRowReorderFn</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `onSelectionChange` @TODO
+
+> type: <b> (d: any) => void</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### ` selectAllText` @TODO
+
+> type: <b> string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+Try using textMap property instead
+
+### `virtualizeColumns` @TODO
+
+> type: <b> boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `renderAddComponent` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderCustomBulkEditConfirmationPopup` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderCustomCheckbox` @TODO
+
+> type: (arg: \{handleChange: (arg: any) => void;checked: boolean;disabled: boolean;cellProps: any; \}) => React.ReactNode; <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderDynamicController` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderEmptyState` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderInformationBanner` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `subEntityData` @TODO
+
+> type: <b>ISubEntityData</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `textMap` @TODO
+
+> type: <b>ITextMap</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `disabledUnselectedItems` @TODO
+
+> type: <b>string[]</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `emptyMessage` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `enableRowReOrdering` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `exportAllColumns` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>false</b> <br/>
+> Deprecated
+
+### `forceInfinite` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `headerContent` @TODO
+
+> type: <b>React.JSX.Element</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `hideActionFilters` @TODO
+
+> type: <b>React.JSX.Element</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `intID` @TODO
+
+> type: <b>any</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `mandatoryExportFieldId` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `paginationEntity` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `renderRowReorderProxy` @TODO
+
+> type: <b>any</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `showCheckboxColumn` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>true</b> <br/>
+> Deprecated
+
+### `scheduleExportName` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `searchPlaceholderText` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `quickfiltersmockdata` @TODO
+
+> type: <b>IV2QuickFilter[]</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated

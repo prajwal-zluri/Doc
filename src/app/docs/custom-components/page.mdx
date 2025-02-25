@@ -1,0 +1,264 @@
+---
+title: Custom Components
+description: Custom Components for v2Table
+---
+
+import { Steps, Callout } from "nextra/components";
+import { Cards, Image } from "nextra/components";
+import { cloneElement } from "react";
+import { FileTree } from "nextra/components";
+import { Table } from "nextra/components";
+
+export default function MdxLayout(props) {
+  return cloneElement(props.children, {
+    components: {
+      img: Image,
+    },
+  });
+}
+
+# Custom Components
+
+The v2Table provides a flexible approach to structuring components for each cell in a column. The type of components required is defined in the property file, and the corresponding components are managed in the componentFactory on the frontend. Each ui in the column can contain components that are recursive in nature, allowing multiple components to be nested together. This enables the creation of unified custom components tailored to the specific needs of the table.
+
+## Structure
+
+```json
+{
+  "ui": {
+    "component": {
+      "type": "text",
+      "valueKey": "app_name"
+    },
+    "editComponent": {
+      // ... => Edit Component
+    },
+    "emptyComponent": {
+      // ... => Empty Component
+    }
+  }
+}
+```
+
+## Component Mode
+
+There are three modes of components in v2Table:
+
+- **Component**: The default component that is rendered in the table.
+- **Edit Component**: The component that is rendered when the cell is in edit mode.
+- **Empty Component**: The component that is rendered when the cell is empty.
+
+### `component`
+
+This is the primary component rendered in the table cell. It is required for every column in the property file and serves as the default for other modes.
+
+The component must always have the `type` and valueKey defined:
+
+- `type`: Represents the type of component rendered in the cell. The value for `type` should correspond to a valid entry in the `componentFactory` (`src/containers/v2table/cellRenderer/componentFactory.tsx`) on the frontend, which maps component types to their respective custom implementations.
+
+- `valueKey`: : Represents the primary key in the data object used to render the data in the component. This key also determines whether the column should represent the empty state or the view state.
+
+<Callout type="info" emoji="ℹ️">
+  The empty state is triggered if the valueKey is null, undefined, an empty
+  array ([]), or an empty object ({}). However, '0' (zero) is considered a valid
+  value and will not trigger the empty state. If the valueKey is not available
+  in the data object, a placeholder value of "-" will be rendered, indicating no
+  available information.
+</Callout>
+
+A component can have four states: view, edit, empty, and loading.
+
+The empty state occurs if the valueKey is present but contains an empty array, null, or undefined. If the valueKey holds valid data, the view state will be rendered accordingly.
+
+#### `hoverComponent` - nested
+
+The emptyComponent follows the similar structure as the `component`. This should be nested inside the `component`. This component is used to render any popover components when the user hovers over a column cell.
+
+```json
+{
+  "ui": {
+    "component": {
+      "type": "text",
+      "valueKey": "app_name",
+      "hoverComponent": {
+        "type": "text",
+        "valueKey": "app_name"
+      }
+    }
+  }
+}
+```
+
+#### `clickComponent` - nested
+
+The clickComponent follows the same structure as component but can include additional optional keys:
+
+- `triggerComponent`: Specifies which component to render in a popover.
+- `redirectUrl`: Redirects the user to a specified URL.
+
+This allows handling three scenarios:
+
+- **Triggering a component**: Renders the specified triggerComponent in a popover when the user clicks on the column.
+
+```json
+{
+  "ui": {
+    "component": {
+      "type": "text",
+      "valueKey": "app_name",
+      "clickComponent": {
+        "triggerComponent": "editComponent"
+      }
+    },
+    "editComponent": {
+      "type": "text",
+      "valueKey": "app_name"
+    }
+  }
+}
+```
+
+- **Rendering a custom component**: Displays the defined component in a popover on click.
+
+```json
+{
+  "ui": {
+    "component": {
+      "type": "text",
+      "valueKey": "app_name",
+      "clickComponent": {
+        "type": "text",
+        "valueKey": "app_name"
+      }
+    }
+  }
+}
+```
+
+- **Redirecting to a URL**: Redirects users to a dynamic URL, supporting query parameters and hash fragments.
+
+```json
+{
+  "ui": {
+    "component": {
+      "type": "text",
+      "valueKey": "app_name",
+      "clickComponent": {
+        "redirectUrl": "/app/{{app_id}}",
+        "query_params": {
+          "application_users": {
+            "filterBy": [
+              {
+                // filter State
+              }
+            ],
+            "sortBy": [] // sort State
+          }
+        },
+        "hash": "users"
+      }
+    }
+  }
+}
+```
+
+**Key Features**
+
+- Dynamic values can be passed in the URL using \{\{valueKey\}\}, ensuring they exist in the API response.
+- Default behavior opens links in a new tab, unless specified otherwise.
+
+In the above example, dynamic values can be passed to the URL using the `{{valueKey}}` syntax. The `valueKey` should be available in the `field_id` and hence in the data object response sent by the List API.
+The above componet will redirect to this URL on click: `app/{{app_id}}?{query_params}#{{hash}}`. The default state of the beahaviour is to open the link in the new tab.
+
+<Callout type="info" emoji="ℹ️">
+  Standard practice is to open in a new page unless the redirection is supposed
+  to open up the nested module. For example `Application` column in application
+  main table is supposed to open up the application module, so it should open in
+  the same tab.
+</Callout>
+
+#### `groupComponents` - nested
+
+The `component` can be recursive, allowing the creation of composite components by nesting multiple components together.
+
+For this to work, the parent component must always have `type`: "group".
+
+Group Component Structure
+When type: "group" is used, a groupComponents key must be defined.
+This key should contain an array of components to be rendered within the group.
+
+```json
+{
+  "ui": {
+    "component": {
+      "type": "group",
+      "valueKey": "`app_name`",
+      "groupComponents": [
+        {
+          "type": "text",
+          "valueKey": "app_name"
+        },
+        {
+          "type": "text",
+          "valueKey": "app_status"
+        }
+      ]
+    }
+  }
+}
+```
+
+### `emptyComponent`
+
+The emptyComponent follows the same structure as the `component`. It is used to render the content when the column enters the empty state. If the emptyComponent is not defined, a placeholder value of "-" will be rendered as the empty state in the table.
+
+### `editComponent`
+
+The editComponent follows the same structure as the `component`, but it is not rendered by default. It needs to be explicitly triggered within the `component` or `emptyComponent` using the clickComponent key. The `editComponent` is renedered on popover after a user clicks on the specified columns.
+
+Here’s how it works:
+
+- The clickComponent triggers the rendering of the editComponent when an click event occurs. This is defined in the clickComponent key.
+
+```json
+{
+  "ui": {
+    "component": {
+      "valueKey": "app_name",
+      "type": "logo",
+      "value": "pencil",
+      "width": 12,
+      "className": "edit__button",
+      "clickComponent": {
+        "triggerComponent": "editComponent",
+        "width": "219px"
+      }
+    },
+    "editComponent": {
+      "type": "text",
+      "valueKey": "app_name"
+    }
+  }
+}
+```
+
+### Example
+
+You can refer to the /src/app/properties/schema/application-main.properties.json property file for a detailed example of how to define custom components.
+
+This property file contains the schema for the application table, including various custom components and their configurations.
+
+This file serves as the bluepriint for the table rendered in this page: `https://app.zluri.dev/v2/applications`
+This will help you understand how different components are structured and used within the v2Table. 🚀
+
+### New Custom Component
+
+> To create a new custom component, refer to the existing custom components in `src/containers/v2table/cellRenderer/CellComponents/CellComponents.tsx`. It is recommended to create new components in the same directory to maintain consistency.
+
+The `ICellComponent` interface outlines the structure of the props available to the custom component, which can be used for customization. Creating a new component will not impact existing components, as each component is self-contained and independent. This allows you to freely experiment with the new component without affecting the rest of the table's functionality.
+
+When creating a new component, ensure not to duplicate functionality. Reuse existing components wherever possible. Once the new component is created, it needs to be mapped in the componentFactory within `src/containers/v2table/cellRenderer/componentFactory.tsx`, as demonstrated for other components. This will make the component available for use within the table.
+
+Currently, there is no automated way to determine whether a component has already been created. The best approach is to collaborate with developers who have previously worked on the table or the designer who created the design to avoid duplication.
+
+Additionally, there are no strict restrictions on the keys that can or should be created in the property file for each component, but it's essential to maintain clear naming conventions.

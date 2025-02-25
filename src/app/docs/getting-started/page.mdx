@@ -1,0 +1,374 @@
+---
+title: Getting Started
+description:
+  Nextra is a framework built on top of Next.js that enables the creation of
+  content-focused websites. It combines the robust features of Next.js with
+  enhanced capabilities for crafting Markdown-based content.
+---
+
+import { Steps, Callout } from "nextra/components";
+import { Cards, Image } from "nextra/components";
+import { cloneElement } from "react";
+import { FileTree } from "nextra/components";
+import { Table } from "nextra/components";
+
+export default function MdxLayout(props) {
+  return cloneElement(props.children, {
+    components: {
+      img: Image,
+    },
+  });
+}
+
+# Getting Started with V2Table
+
+## How to start
+
+<Steps>
+### Create a new property file
+
+<Callout type="info" emoji="ℹ️">
+  Learn More about Property File [here](/docs/property-file)
+</Callout>
+Go to the backend repository (dashboard-api) where the property files are managed.
+Then, create a new property file in `/src/app/properties/schema/*.properties.json`.
+
+> In the current monorepo setup, you need to create this file in both mongo and postgres folder:`mongo/src/app/properties/schema/*.properties.json` and `postgres/src/app/properties/schema/*.properties.json`.
+
+This file is crucial as it defines all the meta-information about the table. It includes essential details such as column names and their descriptions, customized cell components, and the filters associated with each column.
+
+For example lets say you created a property file with the name `test-application.properties.json`:
+
+```json file="test-application.properties.json"
+{
+  "columns": {
+    "application": {
+      "group_name": "Application",
+      "name": "Application",
+      "column_description": "Name of the application used in your organization",
+      "field_ids": ["_id"],
+      "primary_key": "app_name",
+      "is_sortable": true,
+      "sort_key": "app_name",
+      "export_key": "app_name",
+      "is_fixed": true,
+      "default_locked": true,
+      "filter_by": [
+        {
+          "field_name": "Application",
+          "field_type": "string",
+          "field_id": "app_name",
+          "filter_type": "search_in_string",
+          "validations": ["isSpecial"]
+        }
+      ],
+      "ui": {
+        "component": {
+          "type": "text",
+          "valueKey": "_id"
+        }
+      }
+    }
+  }
+}
+```
+
+<FileTree>
+  <FileTree.Folder name="src" defaultOpen>
+    <FileTree.Folder name="properties" defaultOpen>
+      <FileTree.Folder name="schema" defaultOpen>
+        <FileTree.File name="test-application.properties.json" />
+      </FileTree.Folder>
+      <FileTree.Folder name="v2Table"></FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
+
+### Generate Property File
+
+After creating and saving the property file, run the following command to validate and generate the corresponding JavaScript file:
+
+```bash
+npm run gen-property-file
+```
+
+If everything goes well, this generates the javascript file for the same in
+
+```sh
+src/app/properties/v2Table/test-application.properties.js;
+```
+
+<FileTree>
+  <FileTree.Folder name="src" defaultOpen>
+    <FileTree.Folder name="properties" defaultOpen>
+      <FileTree.Folder name="schema" defaultOpen>
+        <FileTree.File name="test-application.properties.json" />
+      </FileTree.Folder>
+      <FileTree.Folder name="v2Table" defaultOpen>
+        <FileTree.File name="test-application.properties.js" />
+      </FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
+
+In the generated file you should see three objects being generated:
+
+- `filters`
+- `columns_ui`
+- `columns`
+
+### Build `/filters` API
+
+<Callout type="info" emoji="ℹ️">
+The `/filters` API name is a misnomer that has persisted over time, as it returns more than just filter data—it provides all properties from the property file, including column metadata, filters, and cell components. This API is crucial for constructing the v2Table on the frontend
+
+</Callout>
+
+Once the property file is generated, you need to build the `/filters` API to fetch the property file data.
+
+> The controller file for the API route ` /v3/organization/:orgId/applications/filters` should be a great starting point to understand how the property file is being used in the application.
+
+Now create new API route `/organization:orgId/test-application/filters` and add the following code to the controller file:
+
+```javascript file="application.controller.js"
+const getPropertyFile = async (req, res, next) => {
+  try {
+    const properties = test_application.filters;
+    const columns = test_application.columns;
+    const group_ui_key = test_application.columns_ui;
+
+    for (let i = 0; i < properties.length; i++) {
+      delete properties[i].validations;
+    }
+
+    const columnsWithUI = columns.map((c) => ({
+      ...c,
+      ui: group_ui_key[c.group_name],
+    }));
+
+    const return_obj = {
+      properties,
+      columns: columnsWithUI,
+    };
+
+    res.json(return_obj);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+```
+
+### Build `/list` API
+
+> This part is yet to be documented. Please refer to the existing API routes for reference and ask any backend devs to follow along.
+
+> The controller file for the API route ` /v3/organization/:orgId/applications` should be a great starting point to understand how the list API should be created.
+
+### Configure New Enums and APIs in frontend
+
+Go to frontend repository (v1-dashboard). Open this file `src/containers/V2TableConstants.ts` Inside this file, you'll find a list of enum values under TableEntityEnum, which serve as unique identifiers for different tables. Add your new entity to this list, ensuring that the identifier is unique and clearly describes the table’s purpose.
+
+> This entity will be used to reference the table across the application. Choose a name that accurately represents its function.
+
+```typescript file="V2TableConstants.ts"
+export const TableEntityEnum = {
+  // ... existing enums
+
+  // add your entity here
+  TEST_APPLICATION: "test_application",
+};
+```
+
+Each table must have at least two APIs:
+
+- `/list`
+- `/filters`
+
+The API mappings for filters and other endpoints are maintained in the same file `src/containers/V2TableConstants.ts`. Locate the `entityApiMap` object in this file and add your new entity’s API mappings.
+
+Currently, API calls are implemented as functions, but there is no strict folder structure for them. You can define your API functions in the same module where you are using the v2Table component. Once the functions are created, map them inside entityApiMap.
+
+<Callout type="info" emoji="ℹ️">
+  <b>Future Improvements </b>
+  <br /> Once all v2Table components are standardized, we plan to simplify this process
+  by allowing direct API URL mapping in entityApiMap instead of mapping function
+  calls. This will make configurations more streamlined and reduce boilerplate code.
+</Callout>
+
+Your API structure for the new entity should look like this:
+
+**_`/filters` API:_**
+
+```typescript
+export async function fetchTestApplicationPropertiesList() {
+  const response = await client.get(`test-application/filters`);
+  return response.data;
+}
+```
+
+**_`/list` API:_**
+
+```typescript
+export async function fetchTestApplicationData(
+  reqObj,
+  page,
+  row,
+  cancelTokenSource = null,
+  searchReqParams,
+  intId,
+  apiProps
+) {
+  const options = {
+    params: {
+      page,
+      row,
+    },
+  };
+  const url = `test-application/list`;
+
+  if (cancelTokenSource) {
+    options.cancelToken = cancelTokenSource.token;
+  }
+
+  if (searchReqParams?.length > 0) {
+    options = {
+      ...options,
+      params: {
+        ...options.params,
+        is_search: true,
+        search_query: `${searchReqParams}`,
+      },
+    };
+  }
+
+  const response = await client.post(url, reqObj, options);
+
+  return response.data;
+}
+```
+
+The /list API may appear verbose, but it follows a consistent structure across all list APIs. It receives multiple parameters, all of which are passed by the v2Table component.
+
+Below is a breakdown of each parameter and its significance:
+
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th>Parameter</Table.Th>
+      <Table.Th>Description</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>reqBody</Table.Td>
+      <Table.Td>
+        The request body containing key table parameters: `sort_by`,
+        `filter_by`, `columns`, and `screen_tag`.
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>page</Table.Td>
+      <Table.Td>
+        The current page number for pagination. Starts with `0`
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>row</Table.Td>
+      <Table.Td>
+        The number of records per page. Defaults to `50` on infinite Pagination.
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>cancelTokenSource</Table.Td>
+      <Table.Td>
+        Used to abort API calls if necessary (default: null). To be deprecated.
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>searchReqParams</Table.Td>
+      <Table.Td>
+        Search parameters containing the query string for filtering data.
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>intId</Table.Td>
+      <Table.Td>
+        The entity ID (if required). To be deprecated. Please use `apiProps` if
+        needed
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>apiProps</Table.Td>
+      <Table.Td>
+        Additional properties that may need to be passed to the API. More Info
+        [here](/docs/api/#apiProps)
+      </Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+
+**Important Considerations**
+
+- The v2Table automatically supplies these arguments when calling the function.
+- The order of parameters is crucial, as v2Table relies on it for passing values correctly.
+
+Once you are done creating the API function, Lets map this over here:
+
+```typescript file="V2TableConstants.ts"
+const entityApiMap: Record<TableEntityType, Partial<Record<ApiType, any>>> = {
+  // .. other existing mappers
+
+  // add your mappings here
+  [TableEntityEnum.TEST_APPLICATION]: {
+    filterApi: fetchTestApplicationPropertiesList,
+    listAPi: fetchTestApplicationData,
+  },
+};
+```
+
+Now we are almost done and ready to go..
+
+### Add v2Table Component where its required.
+
+For the minimal setup, you can add the v2Table component in the following way:
+
+```typescript file="TestApplication.tsx"
+import V2Table, { TableEntityEnum } from "containers/V2Table";
+
+function TestApplication() {
+  return (
+    <V2Table
+      entity={TableEntityEnum.TEST_APPLICATION}
+      textMap={{
+        default: "Application",
+        defaultPlural: "Applications",
+        searchPlaceholder: "Search Applications",
+        tableName: `Applications`,
+      }}
+      columnMinWidth={150}
+    />
+  );
+}
+
+export default TestApplication;
+```
+
+### And thats it!! 🎉
+
+At this point, you should see the v2Table successfully rendered on the screen. The property file we configured contains simple lines of code that render basic text component for each column, displaying the data sent by the backend without any additional customization.
+
+```json
+{
+  "ui": {
+    "component": {
+      "type": "text",
+      "valueKey": "_id"
+    }
+  }
+}
+```
+
+Once you've verified that the data appears as expected, you can begin focusing on adding custom components to enhance the table. For more information on working with custom components, please refer [here](/docs/custom-components##new-custom-component).
+
+</Steps>

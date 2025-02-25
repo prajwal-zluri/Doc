@@ -1,0 +1,251 @@
+---
+title: Migrate to Standard V2Table
+description:
+  Nextra is a framework built on top of Next.js that enables the creation of
+  content-focused websites. It combines the robust features of Next.js with
+  enhanced capabilities for crafting Markdown-based content.
+---
+
+import { Cards, Image } from "nextra/components";
+import { cloneElement } from "react";
+import Migration from "./migration";
+
+export default function MdxLayout(props) {
+  return cloneElement(props.children, {
+    components: {
+      img: Image,
+    },
+  });
+}
+
+# Standardize v2Table
+
+Currenlty v2Table has two major versions active in production. One that is considered standardized
+Standardization ensures consistency across all tables in the system. This involves the following key principles:
+
+1. **Consolidated Property File**
+
+Each table should have a single, well-structured JSON property file that defines all its columns and configurations.
+Mandatory Column Properties
+
+2. **Each column must have:**
+
+- `group_name` (for categorization & filtering icons).
+- `column_description` (provides context & clarity).
+- An associated filter (unless it's an action column).
+
+3. **Validation via Generation Script**
+
+The property file must pass the generation script without errors, ensuring correctness and adherence to the expected schema.
+
+### Standardized vs. Legacy
+
+Currently, v2Table has two active versions in production:
+
+- Standardized Version (New)
+- Legacy Version (Old)
+
+Most tables in the v2 Applications module have been standardized. However, the following tables are still in legacy mode:
+
+- [ ] Access Reviews & Certifications
+- [ ] Spends Automation
+- [ ] Task Dashboard
+- [ ] Desktop Agents
+
+## Why Standardization Matters?
+
+The primary advantage of standardization is maintainability. Standardized tables follow a unified structure, making updates and improvements more efficient.
+
+### Feature Differences
+
+- The new v2 improved filters are only available for standardized tables.
+- Standardization resolves inconsistencies between the table headers displayed in the UI and those in the exported CSV.
+- In the legacy version, some features were built on top of existing bugs. This creates a fragile system where fixing a bug can unintentionally break dependent features. With standardization, bug fixes are applied consistently across all tables
+- The new features will only be built on top of the standardized version.
+
+### Inconsistent Table Headers in Exports
+
+A major issue with the legacy version is that UI headers and exported CSV headers are inconsistent.
+
+**Reason**: Two separate configurations—one in dashboard-api (for v2Table UI) and another in backend-scripts (for export headers). <br/>
+**Solution in Progress**: The standardized JSON property file will be the single source of truth for both UI and export configurations, ensuring consistency.
+
+### How to Migrate?
+
+To transform the legacy property file into a structured format, here's a strategy:
+
+**Step-by-Step Process:**
+
+**Group All Columns Together**: Collect `group_ui_key`, `columns`, and `filters` from the legacy structure and group them under their respective group_name.
+
+**Identify Keys**: Ensure that group_name is used as the identifier for the grouping and that all relevant columns metadata are collected (is_sortable, sort_key, sortKey, export_key, exportKey, defaultLocked, field_ids).
+
+**Convert to Snake Case**: Convert all the keys like `is_sortable`, `sort_key`, `columnDescription`, `defaultLocked` etc., to snake_case to maintain consistency across the property file.
+
+**Group UI and Components**: Move all editComponent, component, and emptyComponent contents inside the ui object.
+
+**Change**: Convert `header` to `name` and add `group_name` key to the transformed object, if not present. More details [here](/docs/property-file#group_name). Use `sorKey` value for both `export_key` and `primary_key` because in the legacy structure, `sortKey` is used for both sorting and exporting.
+
+### Example Transformation:
+
+Consider the following as a legacy property file with single column.
+
+```javascript
+export const default_props = {
+  filter: [],
+  columns: {
+    user: {
+      group_name: "user",
+      field_ids: ["user_id", "user_name"],
+      is_sortable: false,
+    },
+  },
+};
+
+export const group_ui_key = {
+  user: {
+    is_sortable: true,
+    sortKey: "user_name",
+    component: {
+      type: "group",
+      valueKey: "_id",
+      defaultWidth: 180,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        textAlign: "left",
+        width: "100% !important",
+      },
+      groupComponents: [
+        {
+          type: "imageOrNameBadge",
+          valueKey: "user_profile",
+          nameKey: "user_name",
+        },
+        {
+          valueKey: "user_name",
+          style: {
+            width: "100%",
+          },
+          type: "text",
+          toolTip: "user_name",
+        },
+        {
+          type: "logo",
+          valueKey: "user_account_type",
+          style: {
+            display: "flex",
+            marginRight: "auto",
+          },
+        },
+      ],
+    },
+    name: "",
+    header: "User",
+    defaultFlex: 1,
+    defaultLocked: true,
+    id: 1,
+    componentType: "group",
+    columnDescription: `User's name, profile image, and account type`,
+  },
+};
+
+export const filter_props = [
+  {
+    field_name: "User",
+    field_type: "string",
+    field_values: [],
+    field_id: "user_name",
+    filter_type: "search_in_string",
+    negative: false,
+    is_field_static: false,
+    editable: false,
+    draggable: false,
+    validations: ["isSpecial"],
+    is_sortable: true,
+    sort_default_value: 1,
+    is_filterable: true,
+  },
+];
+```
+
+This will be transformed to:
+
+```json
+{
+  "columns": {
+    "group_name": "User",
+    "name": "User",
+    "default_locked": true,
+    "field_ids": ["user_id", "user_name"],
+    "columnDescription": "`User's name, profile image, and account type`",
+    "is_sortable": true,
+    "sort_key": "user_name",
+    "primary_key": "user_name",
+    "export_key": "user_name",
+    "ui": {
+      "component": {
+        "type": "group",
+        "valueKey": "_id",
+        "defaultWidth": 180,
+        "style": {
+          "display": "flex",
+          "justifyContent": "space-between",
+          "textAlign": "left",
+          "width": "100% !important"
+        },
+        "groupComponents": [
+          {
+            "type": "imageOrNameBadge",
+            "valueKey": "user_profile",
+            "nameKey": "user_name"
+          },
+          {
+            "valueKey": "user_name",
+            "style": {
+              "width": "100%"
+            },
+            "type": "text",
+            "toolTip": "user_name"
+          },
+          {
+            "type": "logo",
+            "valueKey": "user_account_type",
+            "style": {
+              "display": "flex",
+              "marginRight": "auto"
+            }
+          }
+        ]
+      }
+    },
+    "filter_by": {
+      "field_name": "User",
+      "field_type": "string",
+      "field_values": [],
+      "field_id": "user_name",
+      "filter_type": "search_in_string",
+      "negative": false,
+      "is_field_static": false,
+      "editable": false,
+      "draggable": false,
+      "validations": ["isSpecial"],
+      "is_sortable": true,
+      "sort_default_value": 1,
+      "is_filterable": true
+    }
+  }
+}
+```
+
+** Key considerations**
+
+- The `filter_by` object is copied as is from the legacy structure.
+- The `ui` object is created to hold all UI-related configurations and `component` is moved inside it.
+- The `group_name` "user" from the legacy structure is used as the identifier for the grouping.
+- The new `group_name` key is added to the transformed object which should be one of the string from the group_name enum. More details [here](docs/property-file#group_name)
+- The `header` key is converted to `name` key which indicates the name of the column.
+- The `field_ids` array is retained as is.
+- The `columnDescription` key is converted to `column_description`. The `defaultLocked` key is converted to `default_locked`. The `sortKey` key is converted to `sort_key`.
+- The `sortKey` is currently used both for sorting and exporting. So just to differentiate the usecase, a new key `export_key` is added to indicate the export key for the column for the which the value is copied from `sortKey` itself.
+- The `primary_key` is added to indicate the primary key for the column. The value used for `sortKey` is copied to `primary_key`.

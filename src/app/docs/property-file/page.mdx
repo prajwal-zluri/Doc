@@ -1,0 +1,351 @@
+---
+description:
+  Nextra is a framework built on top of Next.js that enables the creation of
+  content-focused websites. It combines the robust features of Next.js with
+  enhanced capabilities for crafting Markdown-based content.
+---
+
+import { Cards, Image, Table, Callout } from "nextra/components";
+import { cloneElement } from "react";
+
+export default function MdxLayout(props) {
+  return cloneElement(props.children, {
+    components: {
+      img: Image,
+    },
+  });
+}
+
+# Property File
+
+The property file serves as the configuration blueprint for the v2Table component, defining both the structure and defining the available functionality or features for each column of the table.It is a JSON file that provides detailed information about the columns, metadata, filters, and other table-specific settings. This file enables dynamic table rendering, allowing for flexibility and customization based on the provided configuration.
+
+Key elements included in the property file are:
+
+- **Column Definitions**: Describes the columns in the table, including their names, data types, and any other specific properties like alignment or visibility.
+- **Table Metadata**: Specifies characteristics such as whether the table is sortable, exportable, and filterable, enabling dynamic interactions and enhancing user experience.
+- **Custom Cell Components**: Lists the custom components to be rendered in each column’s cell, allowing for tailored content display (e.g., dropdowns, images, or custom formatting).
+- **Filter Configuration**: Defines the types of filters that should be applied to each column, such as text input, dropdowns, or date pickers.
+- **Field Mappings**: Specifies how data fields are mapped to columns, ensuring the right data is displayed in the correct column.
+
+  This property file facilitates the creation of a fully functional, customizable table by providing all necessary metadata in a centralized configuration format.
+
+## Structure
+
+```json
+{
+  "application_name": {
+    "group_name": "Application",
+    "name": "Application Name",
+    "column_description": "Name of the application used in your organization",
+    "field_ids": ["app_name"],
+    "primary_key": "app_name",
+    "default_locked": true,
+    "is_sortable": true,
+    "sort_key": "app_name",
+    "export_key": "app_name",
+    "is_fixed": true,
+    "filter_by": [
+      {
+        // ... filter structure
+      }
+    ],
+    "ui": {
+      "component": {
+        "type": "text",
+        "valueKey": "app_name"
+      },
+      "editComponent": {
+        // ... => Edit Component
+      },
+      "emptyComponent": {
+        // ... => Empty Component
+      }
+    }
+  }
+}
+```
+
+Below is an example of how the information from the above property file translates in the UI:
+
+![Property File](/img/property-file-column-mapper.png)
+
+## Breakdown
+
+### Column identifier
+
+Each column in the property file has a unique column identifier, which is used to reference the column in the table configuration.
+
+<Callout type="warning" emoji="⚠️">
+ Once created, it is **recommended NOT to update this identifier**, as it may break existing configurations. Additionally, this identifier is stored in the list of columns that determine which fields are rendered in views for each table in the database. If the identifier must be updated, care must be taken to ensure that the corresponding changes are made in the database as well to maintain consistency.
+
+</Callout>
+
+In the above example, `application_name` is the column identifier.
+
+### `column_description`
+
+> Required (except for action column)
+
+The `column_description` key provides a brief description of the column, offering additional context or information about the data it represents. This description is displayed as a tooltip when users hover over the column header, giving them valuable insights and clarifications about the column's content. This is also defined by the product managers.
+
+Link in the description can be added using `{{link}}` syntax. For example:
+
+```json
+{
+  "column_description": "Usage score is calculated based on number of active users, average number days of activity for users and number of activities per user per day.  {{https://support.zluri.com/support/solutions/articles/73000624635-zluri-application-usage-and-user-usage-v1-0}}"
+}
+```
+
+### `default_locked`
+
+> true | "start" | "end"
+
+The `default_locked` key specifies whether the column is locked to the start or the end of the table. If set to true, the column is locked to the start. Setting it to "end" locks the column to the end, while "start" locks it to the start.
+
+This feature is particularly useful for keeping important columns visible while users scroll horizontally through the table, ensuring that key information remains accessible at all times. It is typically defined by product managers.
+
+<Callout>
+  It is RECOMMENDED that at least the first column, which provides essential
+  context for the table, should be locked to the start.
+</Callout>
+
+### `export_key`
+
+The `export_key` defines the field_id used for exporting data. It ensures that the correct information is captured and exported. The `export_key` should match a field_id defined in the column's `field_ids`.
+
+### `field_ids`
+
+> Required (except for action column)
+
+The `field_ids` key is an array of field identifiers that are required for the column. These field identifiers are used by the backend List API to determine which fields should be calculated and returned in the response. The field_ids are essential for mapping the correct data to the column and ensuring that the table displays the relevant information.
+
+### `filter_by`
+
+> Required (except for action column)
+
+The filter_by key defines the filters associated with the column. The structture of the `filter` can be found in the [Filters](/docs/filters) documentation.
+
+### `group_name`
+
+> Required
+
+The `group_name` key defines the category under which each column is grouped. This grouping is displayed as a small pill in the column header, positioned just above the column title. It helps categorize columns visually and makes it easier for users to navigate complex tables.
+
+**Who Defines `group_name`?**
+
+The `group_name` is typically defined by product managers. It is represented as a list of predefined ENUMs that are maintained in the property file generator script.
+
+The following is a list of predefined and acceptable `group_name` values that can be used to cartegorize columsn in the table. These group names are part of the **ENUM** maintained in the property file generator script: `script/generate-property-file.js`
+
+```shell
+  Action
+  Application
+  Automation
+  Contract
+  Cost
+  Department
+  Device
+  License
+  Optimization
+  Security
+  Source
+  Spend
+  Transaction
+  Usage
+  User
+  Vendor
+```
+
+**Why Use ENUM?**
+
+The `group_name` value is used to determine which icons should be displayed for filter categories. Each filter associated with a column will display an icon based on the `group_name` of that column. This ensures consistency in how filters are represented visually across the table.
+
+- **Static Mapping**: The `group_name` is not dynamic because there needs to be a static mapping between each `group_name` and its corresponding icon in the frontend repository. This avoids potential issues with mismatches between group names and icons.
+  By using ENUMs, we ensure that the frontend has a clear, static mapping to render the appropriate icons, providing a consistent and predictable user experience.
+
+**Introducing New `group_name` Values**
+
+If you need to introduce a new group_name that is not already listed, it must be added to the ENUM maintained in the property file generator script. If the new value is not added to the ENUM, the generator script will fail with an error.
+
+Additionally, the corresponding icon for the new group_name must be added to the frontend repository to ensure that the correct icon is displayed in the UI for the relevant filter category.
+
+### `is_fixed`
+
+The `is_fixed` key determines whether the column is fixed in the table. This ensures that the column can't be removed from the view even via Column Modifier sidesheet.
+
+<Callout type="info" emoji="ℹ️">
+  A table should have at least one fixed column. If all columns are removed from
+  the Column Modifier, the v2Table defaults to rendering all columns from the
+  property file. This may appear as a bug to users. Having at least one fixed
+  column ensures users cannot remove all columns from the table.
+</Callout>
+
+### `is_sortable`
+
+The is_sortable key determines whether the column is sortable. If set to true, users can sort the table data based on the values in this column.
+
+### `name`
+
+> Required
+
+The name key specifies the name of the column that is displayed in the table header. This name should be descriptive and easily understood by users, ensuring that it clearly communicates the data represented in the column. Typically, the name is defined by product managers to align with the product's terminology and user expectations.
+
+### `primary_key`
+
+The primary_key key represents the primary key for the column. While this key currently has no significant impact, it is intended to serve as a default fallback key for sorting and exporting data. The primary_key is used as a reference point for sorting and exporting data when no other specific key is defined.
+
+### `sort_key`
+
+The `sort_key` key specifies the key based on which the column should be sorted. When users click on the column header to sort the data, the table uses the `sort_key` to determine the sorting order. The `sort_key` should match a field_id defined in the column's `field_ids`.
+
+### `type` = 'action'
+
+> "action"
+
+The type key identifies the type of the column. Currently, the only valid value is "action". An action column indicates that it doesn't contain any data but is intended for performing actions on the data. Such columns have no field_ids, and they are neither sortable, exportable, nor filterable.
+
+As of now, this key has no effect in the UI and is only used in the generator script to identify action columns. However, there are plans to extend this functionality to the UI in the future to make sure that the action keys aren't present in the custom export sidesheet.
+
+### `ui`
+
+> Required
+
+The ui key contains the component configuration for the column. It specifies the type of component to be rendered in the column's cell, along with any additional properties or settings required for customizing the component. Currently there is no any standards set for the `ui` key, it is upto the developer to define the component. More information on this can be found in the [Custom Components](/docs/custom-components) documentation.
+
+## Need for the Script
+
+```bash
+npm run gen-property-file
+```
+
+Managing property files became increasingly complex due to the way columns, filters, and cell components were originally structured. The script was introduced to streamline maintenance, enforce validation, and ensure compatibility with existing APIs.
+
+### Challenges in the Original Structure
+
+Fragmented Data Management
+
+The property file was divided into three separate objects:
+
+- Column Metadata (e.g., is_sortable, field_ids)
+- Filters
+- Cell Components
+
+Original Structure:
+
+```javascript
+
+const filter_props=[
+    {
+		field_name: 'Application',
+		field_type: 'string',
+		field_id: 'app_name',
+		filter_type: 'search_in_string',
+		validations: ['isSpecial'],
+		negative: false,
+	},
+   //  ... other Props
+]
+
+const group_ui_key = {
+    application: {
+		component: {
+			type: 'text',
+			valueKey: 'app_name',
+		},
+		header: 'Application Name',
+		name: 'Application',
+		columnDescription: 'Name of the application used in your organization',
+	}
+}
+
+
+const columns = application: {
+		field_ids: [
+			'app_logo',
+			'app_name',
+			'app_is_custom',
+			'app_state',
+			'app_id',
+			'app_instances_count',
+		],
+		is_sortable: true,
+		is_fixed: true,
+		sort_key: 'app_name',
+		export_key: 'app_name',
+		group_name: 'application',
+		enabled_filters: ['Application'],
+		defaultLocked: true,
+	}
+
+```
+
+A minor update in one column required changes in multiple places, increasing maintenance overhead and the risk of inconsistencies.
+
+### Lack of a Link Between Filters and Columns
+
+- Filters were managed as standalone objects with no direct connection to the columns they applied to.
+- When the requirement arose to link filters to specific columns, the existing structure made this difficult.
+
+### No Validation Mechanism
+
+- Developers had full freedom to define arbitrary keys, leading to inconsistencies.
+- There were no safeguards to ensure that keys followed a standard convention.
+
+### The Solution: A Consolidated Structure
+
+To address these challenges, we introduced a unified JSON structure where a single object represents all metadata, filters, and cell components for each column. This new structure:
+
+✅ Eliminates redundancy and simplifies maintenance <br/>
+✅ Establishes a direct relationship between columns and their filters <br/>
+✅ Standardizes key definitions and enforces validation <br/>
+
+```json
+{
+  "columns": {
+    "application": {
+      "group_name": "Application",
+      "name": "Application",
+      "column_description": "Name of the application used in your organization",
+      "field_ids": [
+        "app_logo",
+        "app_name",
+        "app_is_custom",
+        "app_state",
+        "app_id",
+        "app_instances_count"
+      ],
+      "primary_key": "app_name",
+      "is_sortable": true,
+      "sort_key": "app_name",
+      "export_key": "app_name",
+      "is_fixed": true,
+      "default_locked": true,
+      "filter_by": [
+        {
+          "field_name": "Application",
+          "field_type": "string",
+          "field_id": "app_name",
+          "filter_type": "search_in_string",
+          "validations": ["isSpecial"]
+        }
+      ],
+      "ui": {
+        "component": {
+          "type": "text",
+          "valueKey": "app_name"
+        }
+      }
+    }
+  }
+}
+```
+
+### Role of the Script
+
+While the new structure is easier to manage, the API still expects the original fragmented format. The script was introduced to:
+
+- Validate property files to ensure correct key definitions and prevent errors.
+- Transform the new consolidated JSON into the existing structure required by the API.
+- Automate this process so that developers can focus on defining properties without worrying about API compatibility.
+- With this approach, we maintain backward compatibility while significantly improving maintainability.
