@@ -1,6 +1,4 @@
-import type { DocsThemeConfig } from "nextra-theme-docs";
-
-const config: DocsThemeConfig = {
+const config = {
   // Your theme configuration
 };
 export default config;
