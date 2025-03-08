@@ -124,7 +124,7 @@ The `field_ids` key is an array of field identifiers that are required for the c
 
 > Required (except for action column)
 
-The filter_by key defines the filters associated with the column. The structture of the `filter` can be found in the [Filters](/docs/filters) documentation.
+The `filter_by` key defines the filters associated with the column. The structture of the `filter` can be found in the [Filters](/docs/filters) documentation.
 
 ### `group_name`
 
@@ -168,7 +168,7 @@ The `group_name` value is used to determine which icons should be displayed for 
 
 If you need to introduce a new group_name that is not already listed, it must be added to the ENUM maintained in the property file generator script. If the new value is not added to the ENUM, the generator script will fail with an error.
 
-Additionally, the corresponding icon for the new group_name must be added to the frontend repository to ensure that the correct icon is displayed in the UI for the relevant filter category.
+Additionally, the corresponding icon for the new `group_name` must be added to the frontend repository to ensure that the correct icon is displayed in the UI for the relevant filter category.
 
 ### `is_fixed`
 
@@ -183,7 +183,7 @@ The `is_fixed` key determines whether the column is fixed in the table. This ens
 
 ### `is_sortable`
 
-The is_sortable key determines whether the column is sortable. If set to true, users can sort the table data based on the values in this column.
+The is_sortable key determines whether the column is sortable. If set to true, users can sort the table data based on the `sort_key` present in this column.
 
 ### `name`
 
@@ -193,7 +193,7 @@ The name key specifies the name of the column that is displayed in the table hea
 
 ### `primary_key`
 
-The primary_key key represents the primary key for the column. While this key currently has no significant impact, it is intended to serve as a default fallback key for sorting and exporting data. The primary_key is used as a reference point for sorting and exporting data when no other specific key is defined.
+The `primary_key` key represents the primary key for the column. While this key currently has no significant impact, it is intended to serve as a default fallback key for sorting and exporting data. The `primary_key` is used as a reference point for sorting and exporting data when no other specific key is defined.
 
 ### `sort_key`
 
@@ -227,7 +227,7 @@ Fragmented Data Management
 
 The property file was divided into three separate objects:
 
-- Column Metadata (e.g., is_sortable, field_ids)
+- Column Metadata (e.g., is_sortable, `field_ids`)
 - Filters
 - Cell Components
 

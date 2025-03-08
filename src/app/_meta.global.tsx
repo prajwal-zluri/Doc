@@ -16,11 +16,9 @@ export default {
       index: {
         display: "hidden",
       },
-      filters: {
-        display: "hidden",
-      },
       "getting-started": "",
       "property-file": "",
+      filters: "",
     },
   },
   //   // You can use JSX elements to change the look of titles in the sidebar, e.g. insert icons

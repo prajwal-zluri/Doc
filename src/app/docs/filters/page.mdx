@@ -3,7 +3,7 @@ title: Filters
 description: How Filters work with v2Table
 ---
 
-import { Cards, Image } from "nextra/components";
+import { Cards, Image, Callout } from "nextra/components";
 import { cloneElement } from "react";
 
 export default function MdxLayout(props) {
@@ -15,3 +15,120 @@ export default function MdxLayout(props) {
 }
 
 # Filters
+
+Filters can and should be applied to any column in v2Table, provided they are supported. Before enabling a filter on a column, consult the backend team to verify whether filtering is applicable.
+
+If the `filter_by` object is not set for a column, the property file generator will issue a warning. To suppress this warning for columns that are not filterable,we need to explicitly specify that filtering is disabled.
+
+## Defining Filterable Columns
+
+The default assumption is that every column is filterable.
+
+- If a column supports filtering, specify the applicable `filter_by` object in the property file.
+- If a column does not support filtering, set the `is_filterable` key to false for that column.
+- If the entire table is unfilterable, set `is_filterable`: false at the table level of the configuration.
+
+At the moment, `is_filterable` field is only used by the script to understand that the column isn't filterable and it won't be added to the generated files.
+
+<Callout type="info" emoji="ℹ️">
+  In some property files, `is_filterable` has been added inside the `filter_by`
+  object. However, this key has no effect in v2Table and can be safely removed.
+</Callout>
+
+Currently each `filter_by` object for the column is an array. The original purpose was the need for a single column to have multiple filters as well. But this is deprecated and we are moving towards having a single filters for a single column. This helps connect the filter state individually to a distinct column and serves as a base for column level filter which can be applied form each column header Kebab Menu.
+
+Example: Making Each Column Unfilterable
+
+```json
+{
+  "columns": {
+    "licenses_optimized": {
+      "name": "Licenses Run On",
+      "group_name": "Optimization",
+      "column_description": "Number of user licenses on which the optimization playbook was run",
+      "field_ids": ["optimized_licenses_count"],
+      "primary_key": "optimized_licenses_count",
+      "is_sortable": true,
+      "sort_key": "optimized_licenses_count",
+      "is_filterable": false,
+      "export_key": "optimized_licenses_count",
+      "ui": {
+        "component": {
+          "type": "text",
+          "valueKey": "optimized_licenses_count",
+          "defaultWidth": 160,
+          "style": { "textAlign": "right", "width": "auto !important" }
+        }
+      }
+    }
+  }
+}
+```
+
+Example of making the entire table unfilterable:
+
+```json
+{
+  "config": {
+    "is_filterable": false
+  },
+  "columns": {
+    //...
+  }
+}
+```
+
+Currently, the `filter_by` object for each column is an array. The original intent was to allow multiple filters per column. However, this approach has been deprecated.
+
+We are now moving towards a single filter per column, which provides a clearer connection between filter state and its respective column and acts as a base when applying filter from column header Kebab Menu.
+
+## Structure
+
+This part of the documentation is still in progress
+
+```typescript
+interface IV2Filter {
+  field_name: string;
+  field_id: string;
+  field_type: string;
+  filter_type: string;
+  field_values?: string[] | number[] | boolean;
+  field_order?: string;
+  negative?: boolean;
+  validations?: string[];
+}
+```
+
+### `field_id`
+
+This is the actual key which is used by the backend to apply the filter on. It must be one of the values available in the [column's field_ids](/docs/property-file#field_ids).
+
+### `filter_type`
+
+> "boolean"| "elem_match"| "expr"| "date_range" | "range" | "objectId" | "string" | "search_in_string" | "search_in_source";
+
+This is the filterType that backend understands.
+
+### `field_type`
+
+> single_select" | "multi_select" | "dynamic_filter" | "string" | "range" | "date_range"
+
+This is the filter type that frontend understands.
+
+### `field_order`
+
+> "contains" | "n_contains" | "eq" | "gt" | "gte" | "lt" | "lte" | "ne"
+
+Relationship of the value | Operators applied on the value
+
+### `negative`
+
+> Either true or false.
+
+If false, this will appply the opposite condition. The default value that backend understands is `true` for this.
+
+### `field_values`
+
+> string[]| number[] | boolean
+
+The actual value the backend is supposed to apply filter with. Except for `boolean` the accepted data type is always an array for this.

@@ -177,12 +177,12 @@ export const TableEntityEnum = {
 };
 ```
 
-Each table must have at least two APIs:
+Each table must have at least two API endpoints:
 
 - `/list`
 - `/filters`
 
-The API mappings for filters and other endpoints are maintained in the same file `src/containers/V2TableConstants.ts`. Locate the `entityApiMap` object in this file and add your new entity’s API mappings.
+The API endpoint mappings for filters and other endpoints are maintained in the same file `src/containers/V2TableConstants.ts`. Locate the `entityApiMap` object in this file and add your new entity’s API mappings.
 
 Currently, API calls are implemented as functions, but there is no strict folder structure for them. You can define your API functions in the same module where you are using the v2Table component. Once the functions are created, map them inside entityApiMap.
 
