@@ -1,0 +1,78 @@
+---
+title: Number Formatting
+description: Number formatting convention in v2Table
+---
+
+### Number Formatting Standards in v2Table
+
+In v2Table, number-related data should follow these formatting standards:
+
+- Amounts with currencies will be truncated after 3 digits (e.g., 1000 → 1k).
+- Numbers will be truncated only after 6 digits.
+- All amounts will have two decimal points.
+
+Example Formatting:
+
+Amounts with Currencies
+
+```sh
+Example:
+
+100 -> $ 100.00
+100.99 -> $ 100.99
+100.999 -> $200.00
+100.994 -> $100.99
+1,000 -> $ 1.00 k
+1,990 -> $ 1.99 K
+1,999 -> $2.00 K
+19999.99 -> $2.00K
+```
+
+### Numbers (Assuming No Decimals)
+
+```sh
+100      -> 100
+1000   -> 1,000
+123456  ->123,456
+1234567   -> 1.23 M
+1000000.    -> 1.00 M
+1999999 -> 2.00 M
+1990000 -> 1.99 M
+```
+
+## Using Number Formatting in v2Table
+
+To apply this formatting standard, use the following component structure in the property file:
+
+If the `valueType` isn't explicitly set but data type is a number (as determined by JavaScript's typeof operator) then, it follows the number formatting standard. For amounts, valueType: "amount" must be explicitly specified to apply amount-related formatting.
+
+### Text Component
+
+```json
+{
+  "ui": {
+    "component": {
+      "type": "text",
+      "valueKey": "app_assigned_license_count", //-> Change this value based on your field_id
+      "valueType": "number" // -> (Optional -> available values= "number"| "amount") , But compulsory for amount
+    }
+  }
+}
+```
+
+### Cost Component (Not Recommended)
+
+The type: "cost" option also serves the same purpose but is no longer recommended in favor of the text component above.
+
+```json
+{
+  "ui": {
+    "component": {
+      "type": "cost",
+      "valueKey": "app_total_contract_value" //-> Change this value based on your field_id
+    }
+  }
+}
+```
+
+[Discussion Thread](https://zluri.slack.com/archives/C07AHFU43B4/p1731313037019879)

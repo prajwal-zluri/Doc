@@ -10,11 +10,11 @@ import { Cards, Image } from "nextra/components";
 import { cloneElement } from "react";
 
 export default function MdxLayout(props) {
-  return cloneElement(props.children, {
-    components: {
-      img: Image,
-    },
-  });
+return cloneElement(props.children, {
+components: {
+img: Image,
+},
+});
 }
 
 # API
@@ -182,12 +182,55 @@ An optional boolean used to disable sorting behavior across all columns in the v
 
 By default, all actions applied to the v2Table are synced to the URL. When multiple v2Tables exist in the application, it's recommended to enable URL syncing for only one table to avoid potential bugs. This setting is especially useful for tables rendered in sidesheets.
 
-### `enableBulkUpdate`
+### `enableBulkEdit` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+
+### `enableBulkUpdate` @TODO
 
 > type: <b>boolean</b> <br/>
 > default: <b>false</b>
 
 This is deprecated just to make sure that no one uses this prop without additional information. Since Bulk Update currently only works for the Application main table, and the component used is just a dummy copy of v1. If needed to be used whatever exists right now for users then go to context.tsx and update the `screen` value to use `User` for users table and `Application` for the Application table. Only use this in the application main table for now. Remove this deprecate sign once v2 bulk update is made correctly functional.
+
+### `enableCacheRestore` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>false</b>
+
+### `enableColumnLevelFilter` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+
+### `enablePlaybook` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+
+### `enableViews` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b>
+> Required:false
+
+### `entity` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Required
+
+### `entityId` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Required: true
+
+### `exportEntity` @TODO
+
+> type: <b>ExportEntityType</b> <br/>
+> default: <b>undefined</b> <br/>
 
 ### `hideColumnModifier`
 
@@ -203,7 +246,12 @@ Specifies whether to hide the column Modifier sidesheet trigger button from the 
 
 Specifies whether to hide the Custom Export option from the options menu.
 
-### `hideExportCSVForExcel`
+### `hideExportAsCSV` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `hideExportCSVForExcel` @TODO
 
 > type: <b>boolean</b> <br/>
 > default: <b>undefined</b> <br/>
@@ -246,12 +294,38 @@ Specifies whether to hide the pagination controller from the UI. When set to tru
 
 Specifies whether to hide the search bar. When set to true, the search bar will be hidden from the UI.
 
+### `hideQuickFilters` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+
 ### `idProperty`
 
 > type: <b>string</b> <br/>
 > default: <b>\_id</b> <br/>
 
 The main identifier for the data, typically set to \_id. It’s recommended not to change this. If you must change, then care must to taken to use the idenfier which uniquely identify each row. Using a non-unique identifier can lead to bugs.
+
+### `onBulkEdit` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `onCellUpdate` @TODO
+
+> type: <b>OnCellUpdateType</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `onRowReorder` @TODO
+
+> type: <b>TypeRowReorderFn</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `onSelectionChange` @TODO
+
+> type: <b> (d: any) => void</b> <br/>
+> default: <b>undefined</b> <br/>
 
 ### ` selectAllText`
 
@@ -260,6 +334,47 @@ The main identifier for the data, typically set to \_id. It’s recommended not 
 > Deprecated
 
 Uset [textMap](#textMap) instead.
+
+### `virtualizeColumns` @TODO
+
+> type: <b> boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `renderAddComponent` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderCustomBulkEditConfirmationPopup` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderCustomCheckbox` @TODO
+
+> type: (arg: \{handleChange: (arg: any) => void;checked: boolean;disabled: boolean;cellProps: any; \}) => React.ReactNode; <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderDynamicController` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderEmptyState` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `renderInformationBanner` @TODO
+
+> type: <b> () => React.ReactNode;</b> <br/>
+> default: <b>undefined</b> <br/>
+
+### `subEntityData` @TODO
+
+> type: <b>ISubEntityData</b> <br/>
+> default: <b>undefined</b> <br/>
 
 ### `textMap`
 
@@ -285,19 +400,79 @@ interface ITextMap {
 
 This object is used to pass in all the displayable text in v2Table.
 
-- _default_: Default fallback text for all displayable text in the table. This is required.
-- _defaultPlural_: Default fallback text for all plural displayable text in the table.This is required.
-- _searchPlaceholder_: Placeholder text in the search bar. Defaults to "default" text if not provided. (In legacy, [searchPlaceholderText](#searchPlaceholderText) will be shown if searchPlaceholder is not available in textMap).
-- _pagination_: Text for the pagination controller. Defaults to "default" text if not provided. (In legacy, [paginationEntity](#paginationEntity) will be shown if pagination is not available in textMap).
-- _paginationPlural_: Plural version of the pagination text, used when the text needs to be plural. Defaults to defaultPlural if not provided.
+- default: Default fallback text for all displayable text in the table. This is required.
+- defaultPlural: Default fallback text for all plural displayable text in the table.This is required.
+- searchPlaceholder: Placeholder text in the search bar. Defaults to "default" text if not provided. (In legacy, [searchPlaceholderText](#searchPlaceholderText) will be shown if searchPlaceholder is not available in textMap).
+- pagination: Text for the pagination controller. Defaults to "default" text if not provided. (In legacy, [`paginationEntity`](#paginationEntity will be shown if pagination is not available in textMap).
+- paginationPlural: Plural version of the pagination text, used when the text needs to be plural. Defaults to defaultPlural if not provided.
 
-### `paginationEntity`
+### `disabledUnselectedItems` @TODO
+
+> type: <b>string[]</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `emptyMessage` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `enableRowReOrdering` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `exportAllColumns` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>false</b> <br/>
+> Deprecated
+
+### `forceInfinite` @TODO
+
+> type: <b>boolean</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `headerContent` @TODO
+
+> type: <b>React.JSX.Element</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `hideActionFilters` @TODO
+
+> type: <b>React.JSX.Element</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `intID` @TODO
+
+> type: <b>any</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `mandatoryExportFieldId` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
+### `paginationEntity` @TODO
 
 > type: <b>string</b> <br/>
 > default: <b>undefined</b> <br/>
 > Deprecated
 
 Use [textMap](#textMap) instead.
+
+### `renderRowReorderProxy` @TODO
+
+> type: <b>any</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
 
 ### `showCheckboxColumn`
 
@@ -306,6 +481,12 @@ Use [textMap](#textMap) instead.
 
 This flag controls the visibility of the checkbox column. The checkbox column is required for triggering actions like bulk update, bulk edit, bulk actions, and selected exports (in Custom Export, it allows exporting only selected items). If no such actions are available and you want to hide the checkbox, set this flag to false.
 
+### `scheduleExportName` @TODO
+
+> type: <b>string</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated
+
 ### `searchPlaceholderText`
 
 > type: <b>string</b> <br/>
@@ -313,3 +494,9 @@ This flag controls the visibility of the checkbox column. The checkbox column is
 > Deprecated
 
 Use [textMap](#textMap) instead
+
+### `quickfiltersmockdata` @TODO
+
+> type: <b>IV2QuickFilter[]</b> <br/>
+> default: <b>undefined</b> <br/>
+> Deprecated

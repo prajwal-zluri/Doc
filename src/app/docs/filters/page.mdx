@@ -3,7 +3,7 @@ title: Filters
 description: How Filters work with v2Table
 ---
 
-import { Cards, Image, Callout } from "nextra/components";
+import { Cards, Image, Callout, Table } from "nextra/components";
 import { cloneElement } from "react";
 
 export default function MdxLayout(props) {
@@ -82,6 +82,539 @@ Currently, the `filter_by` object for each column is an array. The original inte
 
 We are now moving towards a single filter per column, which provides a clearer connection between filter state and its respective column and acts as a base when applying filter from column header Kebab Menu.
 
+There are 8 categories of filters in v2Table
+
+## String Filter
+
+String filters apply to any string-related columns. The available operators for string filters as of this date are:
+
+- contains
+- does not contains
+
+These filters are represented in the property file with the following structure:
+
+```json
+{
+  "field_type": "string",
+  "filter_type": "search_in_string"
+}
+```
+
+<br />
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th rowSpan={2}>Operator</Table.Th>
+      <Table.Th colSpan={4}>Final Output</Table.Th>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th>filter_type</Table.Th>
+      <Table.Th>field_order</Table.Th>
+      <Table.Th>negative</Table.Th>
+      <Table.Th>field_values (example)</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>contains</Table.Td>
+      <Table.Td>search_in_string</Table.Td>
+      <Table.Td>["contains"]</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>["okta"]</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>does not contain</Table.Td>
+      <Table.Td>search_in_string</Table.Td>
+      <Table.Td>["contains"]</Table.Td>
+      <Table.Td>true</Table.Td>
+      <Table.Td>["okta"]</Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+## Boolean Filter
+
+Boolean filters apply to Boolean fields and allow selection between "True" and "False" (these options are not customizable from the property file). Currently, there are no other single-select filters available. The available operator for boolean filters as of this date is:
+
+- is
+
+These filters are represented in the property file with the following structure:
+**Generic structure**
+
+```json
+{
+  "field_type": "single_select",
+  "filter_type": "boolean"
+}
+```
+
+<br />
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th rowSpan={2}>Operator</Table.Th>
+      <Table.Th colSpan={4}>Final Output</Table.Th>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th>filter_type</Table.Th>
+      <Table.Th>field_order</Table.Th>
+      <Table.Th>negative</Table.Th>
+      <Table.Th>field_values (example)</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>is</Table.Td>
+      <Table.Td>boolean</Table.Td>
+      <Table.Td>-</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>true</Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+
+## Number Filter
+
+Number filters apply to numeric fields and support range-based filtering. The available operators for number filters as of this date are:
+
+- is greater than
+- is greater than or equal to
+- is less than
+- is less than or equal to
+- is equal to
+- is in range
+
+The allowed range for numbers is [-99,999,999,999, 99,999,999,999]. (100 Billion)
+
+These filters are represented in the property file with the following structure:
+**Generic structure**
+
+```json
+{
+  "field_type": "range",
+  "filter_type": "range"
+}
+```
+
+<Callout type="info" emoji="ℹ️">
+  The `is equal to` operator requires an exact match, which may lead to issues
+  if the filtered data does not appear to match due to formatting differences.
+  In cases where numbers are compacted, v2Table provides a tooltip displaying
+  the full, exact value, which can be copied to ensure accurate filtering. Learn
+  more about number formatting [here](/docs/standards/number-formatting)
+</Callout>
+
+<br />
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th rowSpan={2}>Operator</Table.Th>
+      <Table.Th colSpan={4}>Final Output</Table.Th>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th>filter_type</Table.Th>
+      <Table.Th>field_order</Table.Th>
+      <Table.Th>negative</Table.Th>
+      <Table.Th>field_values (example)</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>is greater than</Table.Td>
+      <Table.Td>range</Table.Td>
+      <Table.Td>["gt]</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>[1224]</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>is greater than or equal to</Table.Td>
+      <Table.Td>range</Table.Td>
+      <Table.Td>["gte"]</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>[1224]</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>is less than</Table.Td>
+      <Table.Td>range</Table.Td>
+      <Table.Td>["lt]</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>[1224]</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>is less than or equal to</Table.Td>
+      <Table.Td>range</Table.Td>
+      <Table.Td>["lte]</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>[1224]</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>is equal to</Table.Td>
+      <Table.Td>range</Table.Td>
+      <Table.Td>["eq]</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>[1224]</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>is in range</Table.Td>
+      <Table.Td>range</Table.Td>
+      <Table.Td>["gte","lte"]</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>[1224,2225]</Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+
+## Date Filter
+
+Date filters apply to date related fields and support range-based filtering. The available operators for date filters as of this date are:
+
+- is later than
+- is on or later than
+- is earlier than
+- is on or earlier than
+- is on
+- is in between
+
+These filters are represented in the property file with the following structure:
+**Generic structure**
+
+```json
+{
+  "field_type": "date_range",
+  "filter_type": "date_range"
+}
+```
+
+<Callout type="info" emoji="ℹ️">
+
+Since dates are stored with time in the database, and the date filter widget does not support time selection, the "is on" operator with an exact date filter often fails to work as expected. To address this issue, the frontend internally converts the "is on" operator to the "is in between" operator. This spans the filter from the start of the selected date to the end of the selected date, ensuring that all records for the full 24-hour period are captured.
+
+Additionally, all date-related filters are applied based on the user's local timezone. The frontend converts the selected date to an ISO string according to the user's timezone before sending it to the backend, ensuring consistency across different timezones.
+
+For instance, if a user in the IST timezone selects February 14th on the date filter widget, the frontend will convert this selection into a range that spans from 00:00:00 to 23:59:59 of the selected date. In this case, it will be the range from February 14th, 00:00:00 to February 14th, 23:59:59.
+
+The dates are then converted to ISO strings based on the user's timezone, so for a user in IST, this range would be translated as follows:
+
+- Start: 2025-02-14T00:00:00 IST → 2025-02-13T18:30:00.000Z (Converted to UTC)
+- End: 2025-02-14T23:59:59 IST → 2025-02-13T18:29:59.999Z (Converted to UTC)
+
+This ensures that the filter is accurate, even when accounting for timezone differences, and the backend receives the appropriate date range in ISO format.
+
+</Callout>
+
+**Example**
+The user is in the IST time zone and selects February 14th for all operators. For the range filter, the user selects from February 11th to February 14th. However, the data for the end date won't be included in the range filter.
+
+- Start: 2025-02-14T00:00:00 IST → 2025-02-13T18:30:00.000Z (Converted to UTC)
+- End: 2025-02-14T23:59:59 IST → 2025-02-13T18:29:59.999Z (Converted to UTC)
+
+The below fields are same for all the operators.
+
+- filter_type ="date_range"
+- negative=false
+
+The table for the above assumption looks like this:
+
+<br />
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th rowSpan={2}>Operator</Table.Th>
+      <Table.Th colSpan={2}>Final Output</Table.Th>
+      <Table.Th>Remarks</Table.Th>
+
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th>field_order</Table.Th>
+      <Table.Th>field_values (example)</Table.Th>
+    </Table.Tr>
+
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>></Table.Td>
+      <Table.Td>["gt]</Table.Td>
+      <Table.Td>["2025-02-14T18:29:59.999Z"]</Table.Td>
+      <Table.Td>
+      field_value = End of the selected date. <br/>
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>>=</Table.Td>
+      <Table.Td>["gte"]</Table.Td>
+      <Table.Td>["2025-02-13T18:30:00.000Z"]</Table.Td>
+       <Table.Td>
+      field_value = Start of the selected date. <br/>
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>&lt;</Table.Td>
+      <Table.Td>["lt"]</Table.Td>
+      <Table.Td>["2025-02-13T18:30:00.000Z"]</Table.Td>
+       <Table.Td>
+      field_value = Start of the selected date. <br/>
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>&lt;=</Table.Td>
+      <Table.Td>["lte"]</Table.Td>
+      <Table.Td>["2025-02-14T18:29:59.999Z"]</Table.Td>
+      <Table.Td>
+        field_value = End of the selected date. <br/>
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>=</Table.Td>
+      <Table.Td>["gte","lte"]</Table.Td>
+      <Table.Td>["2025-02-13T18:30:00.000Z", "2025-02-14T18:29:59.999Z"]</Table.Td>
+        <Table.Td>
+        field_value = Same date start and end date range <br/>
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td>&lt;-></Table.Td>
+      <Table.Td>["gte","lte"]</Table.Td>
+      <Table.Td>["2025-02-11T18:30:00.000Z", "2025-02-14T13:29:59.999Z"]</Table.Td>
+        <Table.Td>
+        field_value =Start Time of each date<br/>
+      </Table.Td>
+    </Table.Tr>
+
+  </tbody>
+</Table>
+
+## Static Options Filter
+
+Static Options filters are used for string fields with predefined enum values, explicitly listed in the property file. This is a multi-select filter. These filters are commonly referred as **Enum Filter**
+
+The available operators for Static Options filters as of this date are:
+
+- is any of
+
+**Generic structure**
+
+```json
+{
+  "field_type": "multi_select",
+  "options": [
+    { "label": "Active", "value": "active" },
+    { "label": "Inactive", "value": "inactive" }
+  ],
+  "filter_type": "string"
+}
+```
+
+<Callout type="info" emoji="ℹ️">
+  The design for this is done in a way that the search box only if there are
+  more than 6 options available to select.
+</Callout>
+
+If the validation isInFieldValues is added in the property file, it becomes mandatory to include the field_values key with the appropriate options as well. This requirement will be fixed later. For example:
+
+```json
+{
+  "field_type": "multi_select",
+  "options": [
+    { "label": "Active", "value": "active" },
+    { "label": "Inactive", "value": "inactive" }
+  ],
+  "field_values": ["active", "inactive"],
+  "filter_type": "string",
+  "validations": ["isInFieldValues"]
+}
+```
+
+Legacy Handling (Seen in Other Property Files) - Not Recommended
+In legacy property files, the structure may appear as follows:
+
+```json
+{
+  "field_type": "multi_select",
+  "field_values": ["active", "inactive"],
+  "field_labels": ["Active", "Inactive"]
+}
+```
+
+In this case, the field_labels are explicitly defined to map the field_values to human-readable labels.
+
+<br />
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th rowSpan={2}>Operator</Table.Th>
+      <Table.Th colSpan={4}>Final Output</Table.Th>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th>filter_type</Table.Th>
+      <Table.Th>field_order</Table.Th>
+      <Table.Th>negative</Table.Th>
+      <Table.Th>field_values (example)</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>is any of</Table.Td>
+      <Table.Td>string</Table.Td>
+      <Table.Td>-</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>["restricted", "needs review"]</Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+
+## Dynamic Entity Filter
+
+Dynamic Entity filters apply to dynamic data and are multi-select. The options for these filters are fetched via an API. Each API handler is identified by an "entity". These filters are commonly referred as **Entity Filter**
+
+If the entity is already in the entityAPI list, it can be directly referenced in the property file without extra effort. If the API is not listed, a new entity API must be added.
+
+**Writeup pending on how to add new APIs.**
+
+The available operators for Dynamic Entity filters as of this date are:
+
+- is any of
+
+**Generic Structure**
+
+```json
+{
+  "field_type": "dynamic_filter",
+  "entity": "app_users",
+  "filter_type": "objectId"
+}
+```
+
+<br />
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th rowSpan={2}>Operator</Table.Th>
+      <Table.Th colSpan={4}>Final Output</Table.Th>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th>filter_type</Table.Th>
+      <Table.Th>field_order</Table.Th>
+      <Table.Th>negative</Table.Th>
+      <Table.Th>field_values (example)</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>Is Any Of</Table.Td>
+      <Table.Td>objectId</Table.Td>
+      <Table.Td>-</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>["66d75b4a9624f3ac6a8eb615"]</Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+## Dynamic String Filter
+
+From the user's perspective, a Dynamic String Filter functions similarly to a Dynamic Entity Filter. The options are loaded via API, and the filters are handled the same way.
+
+However, some dynamic options, such as User Job Title and Roles, are stored as strings in the database without associated IDs. From the backend perspective, these filters behave like enum filters.
+
+The available operators for Dynamic String filters as of this date are:
+
+- is any of
+
+**Generic Structure**
+
+```json
+{
+  "field_type": "dynamic_filter",
+  "entity": "job_title",
+  "filter_type": "string"
+}
+```
+
+<br />
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th rowSpan={2}>Operator</Table.Th>
+      <Table.Th colSpan={4}>Final Output</Table.Th>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th>filter_type</Table.Th>
+      <Table.Th>field_order</Table.Th>
+      <Table.Th>negative</Table.Th>
+      <Table.Th>field_values (example)</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>Is Any Of</Table.Td>
+      <Table.Td>string</Table.Td>
+      <Table.Td>-</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>["Account Executive"]</Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+
+## Hierarchichal Filter
+
+A Hierarchical Filter is a type of Dynamic Entity Filter where options are grouped in a hierarchical structure. Currently, only "sources" are implemented as hierarchical filters, but future filters like Department, Business Unit, and Cost Center will also follow this structure.
+
+The available operators for Hierarchichal filters as of this date are:
+
+- is any of
+
+**Generic Structure**
+
+```json
+{
+  "field_type": "multi_source",
+  "module_key": "application_users",
+  "filter_type": "search_in_source"
+}
+```
+
+<br />
+<Table>
+  <thead>
+    <Table.Tr>
+      <Table.Th rowSpan={2}>Operator</Table.Th>
+      <Table.Th colSpan={4}>Final Output</Table.Th>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th>filter_type</Table.Th>
+      <Table.Th>field_order</Table.Th>
+      <Table.Th>negative</Table.Th>
+      <Table.Th>field_values (example)</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Td>Is Any Of</Table.Td>
+      <Table.Td>string</Table.Td>
+      <Table.Td>-</Table.Td>
+      <Table.Td>false</Table.Td>
+      <Table.Td>
+        ```json
+          [
+            {
+              key: "global_agent_id",
+              value_type: "objectId",
+              value: ["id"],
+            },
+            {
+              key: "org_integration_id",
+              value_type: "objectId",
+              value: ["key"],
+            },
+            {
+              key: "keyword",
+              value: ["manual"],
+              value_type: "string",
+            },
+          ]
+        ```
+      </Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+
 ## Structure
 
 This part of the documentation is still in progress
@@ -96,6 +629,7 @@ interface IV2Filter {
   field_order?: string;
   negative?: boolean;
   validations?: string[];
+  entity?: string;
 }
 ```
 
@@ -105,7 +639,7 @@ This is the actual key which is used by the backend to apply the filter on. It m
 
 ### `filter_type`
 
-> "boolean"| "elem_match"| "expr"| "date_range" | "range" | "objectId" | "string" | "search_in_string" | "search_in_source";
+> "boolean" | "date_range" | "range" | "objectId" | "string" | "search_in_string" | "search_in_source";
 
 This is the filterType that backend understands.
 
